@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NasaServiceService } from '../services/nasa-service.service';
-import { IonInfiniteScroll } from '@ionic/angular';
+import { IonInfiniteScroll, LoadingController } from '@ionic/angular';
+import { async } from '@angular/core/testing';
 
 @Component({
   selector: 'app-home',
@@ -12,7 +13,10 @@ export class HomePage implements OnInit {
   postsPage = 1;
   arrayPosts: any;
 
-  constructor(public nasaService: NasaServiceService) {}
+  constructor(
+    public nasaService: NasaServiceService,
+    public loadingController: LoadingController
+  ) {}
 
   ngOnInit() {
     // this.getPosts();
@@ -30,10 +34,16 @@ export class HomePage implements OnInit {
       if (!Array.isArray(this.arrayPosts)) {
         this.arrayPosts = [this.arrayPosts];
       }
+      this.arrayPosts = this.arrayPosts.reverse();
     });
   }
 
-  getPagePosts() {
+  async getPagePosts() {
+    const loading = await this.loadingController.create({
+      message: 'Consultando datos de la NASA...',
+    });
+    loading.present();
+
     //llamamos a la funcion getPost de nuestro servicio.
     this.nasaService
       .getPostsPage(this.postLimit, this.postsPage)
@@ -42,6 +52,8 @@ export class HomePage implements OnInit {
         if (!Array.isArray(this.arrayPosts)) {
           this.arrayPosts = [this.arrayPosts];
         }
+        this.arrayPosts = this.arrayPosts.reverse();
+        loading.dismiss();
       });
   }
 
@@ -49,19 +61,21 @@ export class HomePage implements OnInit {
     await this.nasaService
       .getPostsPage(this.postLimit, this.postsPage)
       .then((data) => {
-        if (Array.isArray(this.arrayPosts)){
+        if (Array.isArray(this.arrayPosts)) {
           let dataArr = [];
           if (Array.isArray(data)) {
             dataArr = data;
-          }else {
+          } else {
             dataArr = [data];
           }
+          dataArr = dataArr.reverse();
           this.arrayPosts = this.arrayPosts.concat(dataArr);
-        }else {
+        } else {
           this.arrayPosts = data;
           if (!Array.isArray(this.arrayPosts)) {
             this.arrayPosts = [this.arrayPosts];
           }
+          this.arrayPosts = this.arrayPosts.reverse();
         }
       });
   }

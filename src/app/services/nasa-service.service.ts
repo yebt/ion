@@ -29,8 +29,12 @@ export class NasaServiceService {
 
     const ignoredPages = postsPage - 1;
     const skipDays = ignoredPages * postLimit;
-    const skipTSE = skipDays * 24 * 60 * 60 * 1000;
+    let skipTSE = skipDays * 24 * 60 * 60 * 1000;
     const skipTSS = skipTSE + postLimit * 24 * 60 * 60 * 1000;
+
+    if (ignoredPages > 0) {
+      skipTSE = skipTSE + 24 * 60 * 60 * 1000;
+    }
     const actualTS = new Date().getTime();
 
     const startDate = new Date(actualTS - skipTSS);
